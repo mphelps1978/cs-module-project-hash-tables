@@ -79,14 +79,20 @@ class HashTable:
         # return self.djb2(key) % self.capacity
 
     def put(self, key, value):
-        #day 1
+        # No Collision Checking:
         # self.data[self.hash_index(key)] = value
 
-        #day2
+
+        # With Collision Checking:
+
         index = self.hash_index(key)
+
+        # if there's nothing in there, we can just make a node. That becomes the "head"
         if(self.data[index] == None):
             self.data[index] = HashTableEntry(key, value)
             self.size +=1
+
+            # Otherwise we need to check the keys and eiither overrite the node, or add a new node at the head
         else:
             #check if it exists already
             curr = self.data[index]
@@ -94,18 +100,18 @@ class HashTable:
                 curr = curr.next
             if curr.key == key:
                 curr.value = value
+                # we are overrwriting a node, so we don't need to adjust the size
+
             #it doesn't exist already, so add it to the head of the list
             else:
                 new_entry = HashTableEntry(key, value)
                 new_entry.next = self.data[index]
                 self.data[index] = new_entry
                 self.size +=1
+
+        # check the load factor and adjust size if necessary
         if self.get_load_factor() > .7:
             self.resize(self.capacity * 2)
-        
-        
-
-
 
 
     def delete(self, key):
@@ -146,14 +152,16 @@ class HashTable:
                 #didn't find the key
                 else:
                     return None
-        
+        # Check the size and adjust if necessary
+        # Stretch Goal - Rezised down
+
         if self.get_load_factor() < .2:
             if self.capacity/2 > 8:
                 self.resize(self.capacity//2)
             elif self.capacity > 8:
                 self.resize(8)
 
-                    
+
 
     def get(self, key):
         #day1
@@ -161,13 +169,13 @@ class HashTable:
 
         #day2
         index = self.hash_index(key)
-        #if its the first thing in the ll
+        #if its the first thing in the ll:
         if self.data[index] is not None and self.data[index].key == key:
             return self.data[index].value
-        #there's nothing there to get
+        #there's nothing there to get:
         elif self.data[index] is None:
             return None
-        #it's possibly later in the ll
+        #it's possibly later in the ll:
         else:
             curr = self.data[index]
             while curr.next != None and curr.key != key:
@@ -176,25 +184,30 @@ class HashTable:
                 return None
             else:
                 return curr.value
-            
-        
+
+
 
 
     def resize(self, new_capacity):
+
         old_table = self.data[:]
         self.capacity = new_capacity
         self.data = [None] * new_capacity
+
         for i in range(len(old_table)):
-            #something in that slot
+
+            # if there is something in the slot as we're looping
             if old_table[i] is not None:
-                #linked list in that slot
+
+                # If there's a LL in that slot
                 if old_table[i].next is not None:
                     curr = old_table[i]
                     while curr.next is not None:
                         self.put(curr.key, curr.value)
                         curr = curr.next
                     self.put(curr.key, curr.value)
-                #one thing in that slot
+
+                # If there's only one thing in that slot
                 else:
                     self.put(old_table[i].key, old_table[i].value)
 
